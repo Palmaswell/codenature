@@ -1,0 +1,9 @@
+[tasks.dev]
+command = "cargo"
+args = ["run", "--release"]
+watch = { no_git_ignore = false, watch = ["./src/"] }
+
+[tasks.test]
+command = "cargo"
+args = ["test"]
+watch = true
