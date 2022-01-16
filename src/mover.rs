@@ -1,8 +1,8 @@
 use nannou::geom::vector::Vec2;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub struct Mover {
-    location: Vec2,
+    pub location: Vec2,
     velocity: Vec2,
 }
 
@@ -11,10 +11,10 @@ impl Mover {
         Mover { location, velocity }
     }
 
-    pub fn update(self) -> Self {
+    pub fn update(self, velocity: Vec2) -> Self {
         Self {
-            location: self.location + self.velocity,
-            velocity: self.velocity,
+            location: self.location + velocity,
+            velocity: velocity,
         }
     }
 }
@@ -28,7 +28,7 @@ mod tests {
         let velocity = Vec2::new(1.0, 2.0);
         let mover = Mover::new(Vec2::new(100.0, -100.0), velocity);
 
-        let updated_mover = mover.update();
+        let updated_mover = mover.update(velocity);
         let expected_mover = Mover::new(Vec2::new(101.0, -98.0), velocity);
         assert!(updated_mover == expected_mover);
     }
