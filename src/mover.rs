@@ -11,7 +11,7 @@ impl Mover {
         Mover { location, velocity }
     }
 
-    pub fn update(self, velocity: Vec2) -> Self {
+    pub fn update(&self, velocity: Vec2) -> Self {
         Self {
             location: self.location + velocity,
             velocity: velocity,
