@@ -15,12 +15,10 @@ struct Model {
     mover: Mover,
 }
 
-fn model(app: &App) -> Model {
-    let _boundary = app.window_rect();
+fn model(_app: &App) -> Model {
     let location = Vec2::new(0.0, 0.0);
     let velocity = Vec2::new(0.0, 0.0);
     let acceleration = Vec2::new(-0.001, 0.01);
-
     Model {
         mover: Mover::new(location, velocity, acceleration),
     }
@@ -31,12 +29,14 @@ fn view(app: &App, model: &Model, frame: Frame) {
     let mover = &model.mover;
 
     draw.background().color(PLUM);
-    draw.ellipse().color(STEELBLUE).xy(mover.location);
+    draw.ellipse().color(STEELBLUE).xy(mover.location());
 
     draw.to_frame(app, &frame).unwrap();
 }
 
-fn update(_app: &App, _model: &mut Model, _update: Update) {
-    // let Model { mover, .. } = model;
-    // model.mover = mover.update();
+fn update(app: &App, model: &mut Model, _update: Update) {
+    let boundary = app.window_rect();
+    println!("{:?} =====", boundary);
+    let Model { mover, .. } = model;
+    model.mover = mover.update(&boundary);
 }
