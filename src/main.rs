@@ -44,16 +44,15 @@ fn _update(app: &App, model: &mut Model, _update: Update) {
 fn event(app: &App, model: &mut Model, event: Event) {
     let boundary = app.window_rect();
     let Model { mover, .. } = model;
+
     match event {
         Event::WindowEvent { id: _, simple } => {
             if let Some(mouse_moved) = simple {
                 if let MouseMoved(mouse_location) = mouse_moved {
-                    println!("Matched {:?}!!!!!!!!!!!!!", mouse_location);
+                    model.mover = mover.folow_mouse(&boundary, mouse_location)
                 }
             }
         }
         _ => {}
     }
-
-    model.mover = mover.update(&boundary);
 }

@@ -7,6 +7,23 @@ pub struct Mover {
     acceleration: Vec2,
 }
 
+fn constrain_location(boundary: &Rect, location: Vec2) -> Vec2 {
+    let mut location = location;
+    if location.x > boundary.right() {
+        location.x = boundary.right();
+    } else if location.x < boundary.left() {
+        location.x = boundary.left();
+    }
+
+    if location.y > boundary.top() {
+        location.y = boundary.top();
+    } else if location.y < boundary.bottom() {
+        location.y = boundary.bottom();
+    }
+
+    Vec2::new(location.x, location.y)
+}
+
 impl Mover {
     fn constrain(self, boundary: &Rect) -> [Vec2; 2] {
         let velocity_limit = 5.0;
@@ -55,11 +72,12 @@ impl Mover {
         }
     }
 
-    pub fn folow_mouse(self, mouse_location: Vec2) -> Mover {
+    pub fn folow_mouse(self, boundary: &Rect, mouse_location: Vec2) -> Mover {
         let dir = Vec2::normalize(mouse_location - self.location());
         let acceleration = dir * 0.5;
+
         let velocity = self.velocity + acceleration;
-        let location = self.location + velocity;
+        let location = constrain_location(boundary, self.location + velocity);
         Mover {
             location,
             velocity,
@@ -78,12 +96,12 @@ mod tests {
     use nannou::geom::range::Range;
     use rstest::*;
     #[rstest]
-    pub fn should_follow_mouse_location(init_mover: Mover, mouse_location: Vec2) {
+    pub fn should_follow_mouse_location(boundary: Rect, init_mover: Mover, mouse_location: Vec2) {
         let mover = init_mover;
         let dir = Vec2::normalize(mouse_location - init_mover.location());
         let acceleration = dir * 0.5;
 
-        let mover = mover.folow_mouse(mouse_location);
+        let mover = mover.folow_mouse(&boundary, mouse_location);
 
         let expected = Mover::new(acceleration, acceleration, acceleration);
         assert!(mover == expected);
