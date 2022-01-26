@@ -5,7 +5,7 @@ pub use mover::Mover;
 fn main() {
     println!("Hello, world!");
     nannou::app(model)
-        .update(update)
+        .event(event)
         .simple_window(view)
         .size(1024, 1024)
         .run();
@@ -34,9 +34,26 @@ fn view(app: &App, model: &Model, frame: Frame) {
     draw.to_frame(app, &frame).unwrap();
 }
 
-fn update(app: &App, model: &mut Model, _update: Update) {
+fn _update(app: &App, model: &mut Model, _update: Update) {
     let boundary = app.window_rect();
-    println!("{:?} =====", boundary);
+
     let Model { mover, .. } = model;
+    model.mover = mover.update(&boundary);
+}
+
+fn event(app: &App, model: &mut Model, event: Event) {
+    let boundary = app.window_rect();
+    let Model { mover, .. } = model;
+    match event {
+        Event::WindowEvent { id: _, simple } => {
+            if let Some(mouse_moved) = simple {
+                if let MouseMoved(mouse_location) = mouse_moved {
+                    println!("Matched {:?}!!!!!!!!!!!!!", mouse_location);
+                }
+            }
+        }
+        _ => {}
+    }
+
     model.mover = mover.update(&boundary);
 }
