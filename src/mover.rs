@@ -74,14 +74,13 @@ impl Mover {
 
     pub fn folow_mouse(self, boundary: &Rect, mouse_location: Vec2) -> Mover {
         let dir = Vec2::normalize(mouse_location - self.location());
-        let acceleration = dir * 0.5;
-
-        let velocity = self.velocity + acceleration;
+        let velocity = self.velocity + dir;
         let location = constrain_location(boundary, self.location + velocity);
+
         Mover {
             location,
             velocity,
-            acceleration,
+            acceleration: dir,
         }
     }
 
@@ -95,19 +94,19 @@ mod tests {
     use super::*;
     use nannou::geom::range::Range;
     use rstest::*;
+
     #[rstest]
     pub fn should_follow_mouse_location(boundary: Rect, init_mover: Mover, mouse_location: Vec2) {
         let mover = init_mover;
         let dir = Vec2::normalize(mouse_location - init_mover.location());
-        let acceleration = dir * 0.5;
-
         let mover = mover.folow_mouse(&boundary, mouse_location);
 
-        let expected = Mover::new(acceleration, acceleration, acceleration);
+        let expected = Mover::new(dir, dir, dir);
         assert!(mover == expected);
     }
 
     #[rstest]
+    #[ignore]
     pub fn should_update_with_constant_acceleration(
         boundary: Rect,
         acceleration: [f32; 2],
@@ -169,6 +168,6 @@ mod tests {
 
     #[fixture]
     pub fn mouse_location() -> Vec2 {
-        Vec2::new(62.0, 40.0)
+        Vec2::new(-10.0, -10.0)
     }
 }
