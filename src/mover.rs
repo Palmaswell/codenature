@@ -7,7 +7,35 @@ pub struct Mover {
     acceleration: Vec2,
 }
 
-fn constrain_location(boundary: &Rect, location: Vec2) -> Vec2 {
+impl Mover {
+    pub fn apply_force(&mut self, force: Vec2) {
+        self.acceleration += force
+    }
+
+    pub fn new(location: Vec2, velocity: Vec2, acceleration: Vec2) -> Self {
+        Mover {
+            location,
+            velocity,
+            acceleration,
+        }
+    }
+
+    pub fn update(self, boundary: &Rect) -> Mover {
+        let velocity = constrain(boundary, self.velocity + self.acceleration);
+        let location = constrain(boundary, self.location + velocity);
+        Mover {
+            location,
+            velocity,
+            acceleration: Vec2::new(0.0, 0.0),
+        }
+    }
+
+    pub fn location(&self) -> Vec2 {
+        self.location
+    }
+}
+
+fn constrain(boundary: &Rect, location: Vec2) -> Vec2 {
     let mut location = location;
     if location.x > boundary.right() {
         location.x = boundary.right();
@@ -24,124 +52,22 @@ fn constrain_location(boundary: &Rect, location: Vec2) -> Vec2 {
     Vec2::new(location.x, location.y)
 }
 
-impl Mover {
-    fn constrain(self, boundary: &Rect) -> [Vec2; 2] {
-        let velocity_limit = 5.0;
-        let mut velocity = self.velocity + self.acceleration;
-        let mut location = self.location + velocity;
-
-        // Set a velocity limit
-        if velocity.x > velocity_limit {
-            velocity.x = velocity_limit
-        }
-
-        if velocity.y > velocity_limit {
-            velocity.y = velocity_limit
-        }
-
-        // Keep the mover within the window boundaries.
-        if location.x < boundary.left() {
-            location.x = boundary.right()
-        } else if location.x > boundary.right() {
-            location.x = boundary.left()
-        }
-
-        if location.y < boundary.bottom() {
-            location.y = boundary.top()
-        } else if location.y > boundary.top() {
-            location.y = boundary.bottom()
-        }
-
-        [location, velocity]
-    }
-
-    pub fn new(location: Vec2, velocity: Vec2, acceleration: Vec2) -> Self {
-        Mover {
-            location,
-            velocity,
-            acceleration,
-        }
-    }
-
-    pub fn update(self, boundary: &Rect) -> Mover {
-        let [location, velocity] = self.constrain(boundary);
-        Mover {
-            location,
-            velocity,
-            acceleration: self.acceleration,
-        }
-    }
-
-    pub fn folow_mouse(self, boundary: &Rect, mouse_location: Vec2) -> Mover {
-        let dir = Vec2::normalize(mouse_location - self.location());
-        let acceleration = dir * 0.5;
-
-        let velocity = self.velocity + acceleration;
-        let location = constrain_location(boundary, self.location + velocity);
-        Mover {
-            location,
-            velocity,
-            acceleration,
-        }
-    }
-
-    pub fn location(&self) -> Vec2 {
-        self.location
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use nannou::geom::range::Range;
     use rstest::*;
-    #[rstest]
-    pub fn should_follow_mouse_location(boundary: Rect, init_mover: Mover, mouse_location: Vec2) {
-        let mover = init_mover;
-        let dir = Vec2::normalize(mouse_location - init_mover.location());
-        let acceleration = dir * 0.5;
-
-        let mover = mover.folow_mouse(&boundary, mouse_location);
-
-        let expected = Mover::new(acceleration, acceleration, acceleration);
-        assert!(mover == expected);
-    }
 
     #[rstest]
-    pub fn should_update_with_constant_acceleration(
-        boundary: Rect,
-        acceleration: [f32; 2],
-        init_mover: Mover,
-    ) {
-        let [acc_x, acc_y] = acceleration;
-        let acceleration = Vec2::new(acc_x, acc_y);
-        let mover = init_mover;
-
+    pub fn should_accumulate_force(init_mover: Mover, init_acc: Vec2, boundary: Rect) {
+        let mut mover = init_mover;
+        mover.apply_force(Vec2::new(1.0, 1.0));
+        mover.apply_force(Vec2::new(2.0, 2.0));
+        assert_eq!(mover.acceleration, Vec2::new(3.0, 3.0) + init_acc);
+        assert_eq!(mover.location(), Vec2::new(0.0, 0.0));
         let mover = mover.update(&boundary);
-        let expected = Mover::new(
-            Vec2::new(acc_x, acc_y),
-            Vec2::new(acc_x, acc_y),
-            acceleration,
-        );
-
-        assert!(mover == expected);
-
-        let mover = mover.update(&boundary);
-        let expected = Mover::new(
-            Vec2::new(acc_x * 3.0, acc_y * 3.0),
-            Vec2::new(acc_x * 2.0, acc_y * 2.0),
-            acceleration,
-        );
-        assert!(mover == expected);
-
-        let mover = mover.update(&boundary);
-        let expected = Mover::new(
-            Vec2::new(acc_x * 6.0, acc_y * 6.0),
-            Vec2::new(acc_x * 3.0, acc_y * 3.0),
-            acceleration,
-        );
-
-        assert!(mover == expected);
+        assert_eq!(mover.acceleration, Vec2::new(0.0, 0.0));
+        assert_eq!(mover.location(), Vec2::new(3.0, 3.0) + init_acc);
     }
 
     #[fixture]
@@ -151,20 +77,18 @@ mod tests {
     }
 
     #[fixture]
-    pub fn acceleration() -> [f32; 2] {
+    pub fn init_acc() -> Vec2 {
         let acc_x = -0.001;
         let acc_y = 0.01;
 
-        [acc_x, acc_y]
+        Vec2::new(acc_x, acc_y)
     }
 
     #[fixture]
-    pub fn init_mover(acceleration: [f32; 2]) -> Mover {
-        let [acc_x, acc_y] = acceleration;
+    pub fn init_mover(init_acc: Vec2) -> Mover {
         let location = Vec2::new(0.0, 0.0);
         let velocity = Vec2::new(0.0, 0.0);
-        let acceleration = Vec2::new(acc_x, acc_y);
-        Mover::new(location, velocity, acceleration)
+        Mover::new(location, velocity, init_acc)
     }
 
     #[fixture]
