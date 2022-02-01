@@ -10,9 +10,8 @@ pub struct Mover {
 
 impl Mover {
     pub fn apply_force(&mut self, force: Vec2) {
-        // Newtons secons law is that acceleration equals force divided by mass.
+        // * Newtons second law is that acceleration equals accumulated force divided by mass.
         let f = force / self.mass;
-        println!("f: {:?}))))))))", f);
         self.acceleration += f;
     }
 
@@ -21,7 +20,7 @@ impl Mover {
             location,
             velocity,
             acceleration,
-            mass: 10.0,
+            mass: 1.0,
         }
     }
 
