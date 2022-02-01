@@ -3,7 +3,6 @@ mod mover;
 pub use mover::Mover;
 
 fn main() {
-    println!("Hello, world!");
     nannou::app(model)
         .update(update)
         .simple_window(view)
@@ -36,7 +35,11 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
 fn update(app: &App, model: &mut Model, _update: Update) {
     let boundary = app.window_rect();
-    println!("{:?} =====", boundary);
     let Model { mover, .. } = model;
+    let wind = Vec2::new(0.01, 0.0);
+    let gravity = Vec2::new(0.0, 0.01);
+    mover.apply_force(wind);
+    mover.apply_force(gravity);
+
     model.mover = mover.update(&boundary);
 }
