@@ -5,11 +5,15 @@ pub struct Mover {
     location: Vec2,
     velocity: Vec2,
     acceleration: Vec2,
+    mass: f32,
 }
 
 impl Mover {
     pub fn apply_force(&mut self, force: Vec2) {
-        self.acceleration += force
+        // Newtons secons law is that acceleration equals force divided by mass.
+        let f = force / self.mass;
+        println!("f: {:?}))))))))", f);
+        self.acceleration += f;
     }
 
     pub fn new(location: Vec2, velocity: Vec2, acceleration: Vec2) -> Self {
@@ -17,6 +21,7 @@ impl Mover {
             location,
             velocity,
             acceleration,
+            mass: 10.0,
         }
     }
 
@@ -27,6 +32,7 @@ impl Mover {
             location,
             velocity,
             acceleration: Vec2::new(0.0, 0.0),
+            mass: self.mass,
         }
     }
 
@@ -59,15 +65,15 @@ mod tests {
     use rstest::*;
 
     #[rstest]
-    pub fn should_accumulate_force(init_mover: Mover, init_acc: Vec2, boundary: Rect) {
+    pub fn should_accumulate_force(init_mover: Mover, boundary: Rect) {
         let mut mover = init_mover;
         mover.apply_force(Vec2::new(1.0, 1.0));
         mover.apply_force(Vec2::new(2.0, 2.0));
-        assert_eq!(mover.acceleration, Vec2::new(3.0, 3.0) + init_acc);
+        assert_eq!(mover.acceleration, Vec2::new(0.299, 0.31));
         assert_eq!(mover.location(), Vec2::new(0.0, 0.0));
         let mover = mover.update(&boundary);
         assert_eq!(mover.acceleration, Vec2::new(0.0, 0.0));
-        assert_eq!(mover.location(), Vec2::new(3.0, 3.0) + init_acc);
+        assert_eq!(mover.location(), Vec2::new(0.299, 0.31));
     }
 
     #[fixture]
