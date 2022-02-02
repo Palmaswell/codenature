@@ -10,17 +10,18 @@ pub struct Mover {
 
 impl Mover {
     pub fn apply_force(&mut self, force: Vec2) {
-        // * Newtons second law is that acceleration equals accumulated force divided by mass.
+        // * Newtons second law is that acceleration equals
+        // * accumulated force divided by mass.
         let f = force / self.mass;
         self.acceleration += f;
     }
 
-    pub fn new(location: Vec2, velocity: Vec2, acceleration: Vec2) -> Self {
+    pub fn new(location: Vec2, mass: f32) -> Self {
         Mover {
             location,
-            velocity,
-            acceleration,
-            mass: 1.0,
+            velocity: Vec2::new(0.0, 0.0),
+            acceleration: Vec2::new(0.0, 0.0),
+            mass,
         }
     }
 
@@ -81,11 +82,17 @@ mod tests {
         let mut mover = init_mover;
         mover.apply_force(Vec2::new(1.0, 1.0));
         mover.apply_force(Vec2::new(2.0, 2.0));
-        assert_eq!(mover.acceleration, Vec2::new(0.299, 0.31));
+        assert_eq!(mover.acceleration, Vec2::new(0.3, 0.3));
         assert_eq!(mover.location(), Vec2::new(0.0, 0.0));
         let mover = mover.update(&boundary);
         assert_eq!(mover.acceleration, Vec2::new(0.0, 0.0));
-        assert_eq!(mover.location(), Vec2::new(0.299, 0.31));
+        assert_eq!(mover.location(), Vec2::new(0.3, 0.3));
+    }
+
+    #[fixture]
+    pub fn init_mover() -> Mover {
+        let location = Vec2::new(0.0, 0.0);
+        Mover::new(location, 10.0)
     }
 
     #[fixture]
@@ -100,13 +107,6 @@ mod tests {
         let acc_y = 0.01;
 
         Vec2::new(acc_x, acc_y)
-    }
-
-    #[fixture]
-    pub fn init_mover(init_acc: Vec2) -> Mover {
-        let location = Vec2::new(0.0, 0.0);
-        let velocity = Vec2::new(0.0, 0.0);
-        Mover::new(location, velocity, init_acc)
     }
 
     #[fixture]

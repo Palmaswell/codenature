@@ -16,10 +16,9 @@ struct Model {
 
 fn model(_app: &App) -> Model {
     let location = Vec2::new(0.0, 0.0);
-    let velocity = Vec2::new(0.0, 0.0);
-    let acceleration = Vec2::new(-0.001, 0.01);
+    let mass = 5.0;
     Model {
-        mover: Mover::new(location, velocity, acceleration),
+        mover: Mover::new(location, mass),
     }
 }
 
