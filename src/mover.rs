@@ -25,8 +25,9 @@ impl Mover {
     }
 
     pub fn update(self, boundary: &Rect) -> Mover {
-        let velocity = constrain(boundary, self.velocity + self.acceleration);
-        let location = constrain(boundary, self.location + velocity);
+        let mut velocity = self.velocity + self.acceleration;
+        let location = constrain_location(boundary, self.location + velocity);
+        let velocity = constrain_velocity(boundary, &mut velocity, &location);
         Mover {
             location,
             velocity,
@@ -40,7 +41,7 @@ impl Mover {
     }
 }
 
-fn constrain(boundary: &Rect, location: Vec2) -> Vec2 {
+fn constrain_location(boundary: &Rect, location: Vec2) -> Vec2 {
     let mut location = location;
     if location.x > boundary.right() {
         location.x = boundary.right();
@@ -55,6 +56,18 @@ fn constrain(boundary: &Rect, location: Vec2) -> Vec2 {
     }
 
     Vec2::new(location.x, location.y)
+}
+
+fn constrain_velocity(boundary: &Rect, velocity: &mut Vec2, location: &Vec2) -> Vec2 {
+    if location.x > boundary.right() || location.x < boundary.left() {
+        velocity.x = velocity.x * -1.0;
+    }
+
+    if location.y > boundary.top() || location.y < boundary.bottom() {
+        velocity.x = velocity.y * -1.0;
+    }
+
+    Vec2::new(velocity.x, velocity.y)
 }
 
 #[cfg(test)]
