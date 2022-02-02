@@ -11,34 +11,52 @@ fn main() {
 }
 
 struct Model {
-    mover: Mover,
+    movers: Vec<Mover>,
 }
 
-fn model(_app: &App) -> Model {
-    let location = Vec2::new(0.0, 0.0);
-    let mass = 5.0;
-    Model {
-        mover: Mover::new(location, mass),
+const NUM_MOVERS: usize = 200;
+
+fn model(app: &App) -> Model {
+    let mut movers: Vec<Mover> = Vec::new();
+    let boundary = app.window_rect();
+    for _ in 0..NUM_MOVERS {
+        let location = Vec2::new(
+            random_range(boundary.left(), boundary.right()),
+            random_range(boundary.bottom(), boundary.top()),
+        );
+        let mass = random_range(1.0, 5.0);
+
+        let mover = Mover::new(location, mass);
+        movers.push(mover);
     }
+
+    Model { movers }
 }
 
 fn view(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
-    let mover = &model.mover;
 
     draw.background().color(PLUM);
-    draw.ellipse().color(STEELBLUE).xy(mover.location());
+    for mover in model.movers.iter() {
+        draw.ellipse()
+            .radius(mover.mass())
+            .color(STEELBLUE)
+            .xy(mover.location());
+    }
 
     draw.to_frame(app, &frame).unwrap();
 }
 
 fn update(app: &App, model: &mut Model, _update: Update) {
+    let mut movers: Vec<Mover> = Vec::new();
     let boundary = app.window_rect();
-    let Model { mover, .. } = model;
     let wind = Vec2::new(0.01, 0.0);
     let gravity = Vec2::new(0.0, 0.01);
-    mover.apply_force(wind);
-    mover.apply_force(gravity);
 
-    model.mover = mover.update(&boundary);
+    for mover in model.movers.iter_mut() {
+        mover.apply_force(wind);
+        mover.apply_force(gravity);
+        movers.push(mover.update(&boundary));
+    }
+    model.movers = movers;
 }

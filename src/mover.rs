@@ -40,8 +40,13 @@ impl Mover {
     pub fn location(&self) -> Vec2 {
         self.location
     }
+
+    pub fn mass(&self) -> f32 {
+        self.mass
+    }
 }
 
+// TODO: Fix constrain_location to work with negative values.
 fn constrain_location(boundary: &Rect, location: Vec2) -> Vec2 {
     let mut location = location;
     if location.x > boundary.right() {
