@@ -46,18 +46,21 @@ impl Mover {
     }
 }
 
-// TODO: Fix constrain_location to work with negative values.
 fn constrain_location(boundary: &Rect, location: Vec2) -> Vec2 {
     let mut location = location;
+
     if location.x > boundary.right() {
         location.x = boundary.right();
-    } else if location.x < boundary.left() {
+    }
+
+    if location.x < boundary.left() {
         location.x = boundary.left();
     }
 
     if location.y > boundary.top() {
         location.y = boundary.top();
-    } else if location.y < boundary.bottom() {
+    }
+    if location.y < boundary.bottom() {
         location.y = boundary.bottom();
     }
 
@@ -65,15 +68,27 @@ fn constrain_location(boundary: &Rect, location: Vec2) -> Vec2 {
 }
 
 fn constrain_velocity(boundary: &Rect, velocity: &mut Vec2, location: &Vec2) -> Vec2 {
-    if location.x > boundary.right() || location.x < boundary.left() {
+    if location.x >= boundary.right() {
         velocity.x = velocity.x * -1.0;
     }
 
-    if location.y > boundary.top() || location.y < boundary.bottom() {
-        velocity.x = velocity.y * -1.0;
+    if location.x <= boundary.left() {
+        velocity.x = velocity.x * 1.0;
+    }
+
+    if location.y >= boundary.top() {
+        velocity.y = velocity.y * -1.0;
+    }
+
+    if location.y <= boundary.bottom() {
+        velocity.y = velocity.y * 1.0;
     }
 
     Vec2::new(velocity.x, velocity.y)
+}
+
+pub fn is_positive(n: f32) -> bool {
+    n > 0.0
 }
 
 #[cfg(test)]
@@ -92,6 +107,11 @@ mod tests {
         let mover = mover.update(&boundary);
         assert_eq!(mover.acceleration, Vec2::new(0.0, 0.0));
         assert_eq!(mover.location(), Vec2::new(0.3, 0.3));
+    }
+    #[rstest]
+    pub fn should_verify_floag() {
+        assert!(is_positive(1.0));
+        assert!(!is_positive(-1.0));
     }
 
     #[fixture]

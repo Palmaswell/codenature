@@ -14,7 +14,7 @@ struct Model {
     movers: Vec<Mover>,
 }
 
-const NUM_MOVERS: usize = 200;
+const NUM_MOVERS: usize = 500;
 
 fn model(app: &App) -> Model {
     let mut movers: Vec<Mover> = Vec::new();
