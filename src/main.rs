@@ -14,7 +14,7 @@ struct Model {
     movers: Vec<Mover>,
 }
 
-const NUM_MOVERS: usize = 500;
+const NUM_MOVERS: usize = 10;
 
 fn model(app: &App) -> Model {
     let mut movers: Vec<Mover> = Vec::new();
@@ -50,10 +50,19 @@ fn view(app: &App, model: &Model, frame: Frame) {
 fn update(app: &App, model: &mut Model, _update: Update) {
     let mut movers: Vec<Mover> = Vec::new();
     let boundary = app.window_rect();
-    let wind = Vec2::new(0.01, 0.0);
-    let gravity = Vec2::new(0.0, 0.01);
-
+    let wind = Vec2::new(-0.01, 0.0);
+    let gravity = Vec2::new(0.0, -0.01);
+    // Drag force
+    // f = ||v||^ * c * v * -1
+    let c = 0.1;
     for mover in model.movers.iter_mut() {
+        let v = mover.velocity();
+        let speed = (v.x.powf(2.0) + v.y.powf(2.0)).sqrt();
+        let drag_mag = c * speed.powf(2.0);
+        let drag = v * -1.0 * drag_mag;
+        // TODO: fix drag normalization that returns NAN
+        // let drag = drag.normalize() * drag_mag;
+        mover.apply_force(drag);
         mover.apply_force(wind);
         mover.apply_force(gravity);
         movers.push(mover.update(&boundary));

@@ -44,6 +44,10 @@ impl Mover {
     pub fn mass(&self) -> f32 {
         self.mass
     }
+
+    pub fn velocity(&self) -> Vec2 {
+        self.velocity
+    }
 }
 
 fn constrain_location(boundary: &Rect, location: Vec2) -> Vec2 {
@@ -60,6 +64,7 @@ fn constrain_location(boundary: &Rect, location: Vec2) -> Vec2 {
     if location.y > boundary.top() {
         location.y = boundary.top();
     }
+
     if location.y < boundary.bottom() {
         location.y = boundary.bottom();
     }
@@ -68,20 +73,12 @@ fn constrain_location(boundary: &Rect, location: Vec2) -> Vec2 {
 }
 
 fn constrain_velocity(boundary: &Rect, velocity: &mut Vec2, location: &Vec2) -> Vec2 {
-    if location.x >= boundary.right() {
+    if location.x >= boundary.right() || location.x <= boundary.left() {
         velocity.x = velocity.x * -1.0;
     }
 
-    if location.x <= boundary.left() {
-        velocity.x = velocity.x * 1.0;
-    }
-
-    if location.y >= boundary.top() {
+    if location.y >= boundary.top() || location.y <= boundary.bottom() {
         velocity.y = velocity.y * -1.0;
-    }
-
-    if location.y <= boundary.bottom() {
-        velocity.y = velocity.y * 1.0;
     }
 
     Vec2::new(velocity.x, velocity.y)
